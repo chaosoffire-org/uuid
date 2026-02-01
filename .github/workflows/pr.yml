@@ -1,7 +1,7 @@
 # Get from https://github.com/lxc/distrobuilder
 name: DCO and Branch Target Check
 on:
-  - pull_request
+  pull_request:
 
 permissions:
   contents: read
