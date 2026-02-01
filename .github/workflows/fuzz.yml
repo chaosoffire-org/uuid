@@ -8,6 +8,9 @@ on:
     - cron: '0 2 * * *'
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   # Check if there are new commits (for scheduled runs)
   check-changes:
