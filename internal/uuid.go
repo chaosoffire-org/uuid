@@ -146,54 +146,58 @@ func (uuid *UUID) Scan(src interface{}) error {
 func Parse(s string) (UUID, error) {
 	var uuid UUID
 
-	if len(s) != 36 {
-		switch len(s) {
-		case 45:
-			if s[:9] != "urn:uuid:" {
-				return Nil, URNPrefixError{s[:9]}
-			}
-
-			ptr := unsafe.Pointer(unsafe.StringData(s))
-			s = unsafe.String((*byte)(unsafe.Pointer(uintptr(ptr)+9)), 36)
-		case 32:
-			var acc byte
-
-			ptr := unsafe.Pointer(unsafe.StringData(s))
-			for i := uintptr(0); i < 16; i++ {
-				x1 := *(*byte)(unsafe.Pointer(uintptr(ptr) + i*2))
-				x2 := *(*byte)(unsafe.Pointer(uintptr(ptr) + i*2 + 1))
-
-				v1 := xvalues[x1]
-				v2 := xvalues[x2]
-
-				acc |= v1 | v2
-				uuid[i] = (v1 << 4) | v2
-			}
-
-			if acc > 15 {
-				return Nil, ErrInvalidUUIDFormat
-			}
-
-			return uuid, nil
-		case 38:
-			if s[0] != '{' || s[37] != '}' {
-				return Nil, ErrInvalidBracketedFormat
-			}
-
-			ptr := unsafe.Pointer(unsafe.StringData(s))
-			s = unsafe.String((*byte)(unsafe.Pointer(uintptr(ptr)+1)), 36)
-		default:
-			return Nil, invalidLengthError{len(s)}
-		}
-	}
-
 	val := unsafe.StringData(s)
 	valPtr := unsafe.Pointer(val)
 
-	d1 := *(*byte)(unsafe.Pointer(uintptr(valPtr) + 8)) ^ '-'
-	d2 := *(*byte)(unsafe.Pointer(uintptr(valPtr) + 13)) ^ '-'
-	d3 := *(*byte)(unsafe.Pointer(uintptr(valPtr) + 18)) ^ '-'
-	d4 := *(*byte)(unsafe.Pointer(uintptr(valPtr) + 23)) ^ '-'
+	var ptr unsafe.Pointer
+
+	switch len(s) {
+	case 32:
+		var acc byte
+
+		ptr = valPtr // 32 bytes
+		for i := uintptr(0); i < 16; i++ {
+			x1 := *(*byte)(unsafe.Pointer(uintptr(ptr) + i*2))
+			x2 := *(*byte)(unsafe.Pointer(uintptr(ptr) + i*2 + 1))
+
+			v1 := xvalues[x1]
+			v2 := xvalues[x2]
+
+			acc |= v1 | v2
+			uuid[i] = (v1 << 4) | v2
+		}
+
+		if acc > 15 {
+			return Nil, ErrInvalidUUIDFormat
+		}
+
+		return uuid, nil
+	case 36:
+		ptr = valPtr // 36 bytes
+	case 38:
+		d1 := *(*byte)(valPtr) ^ '{'
+		d2 := *(*byte)(unsafe.Pointer(uintptr(valPtr) + 37)) ^ '}'
+
+		if d1|d2 != 0 {
+			return Nil, ErrInvalidBracketedFormat
+		}
+
+		ptr = unsafe.Pointer(uintptr(valPtr) + 1) // 36 + 1 bytes
+	case 45:
+		prefix := unsafe.String((*byte)(valPtr), 9)
+		if prefix != "urn:uuid:" {
+			return Nil, URNPrefixError{prefix}
+		}
+
+		ptr = unsafe.Pointer(uintptr(valPtr) + 9) // 36 bytes
+	default:
+		return Nil, invalidLengthError{len(s)}
+	}
+
+	d1 := *(*byte)(unsafe.Pointer(uintptr(ptr) + 8)) ^ '-'
+	d2 := *(*byte)(unsafe.Pointer(uintptr(ptr) + 13)) ^ '-'
+	d3 := *(*byte)(unsafe.Pointer(uintptr(ptr) + 18)) ^ '-'
+	d4 := *(*byte)(unsafe.Pointer(uintptr(ptr) + 23)) ^ '-'
 
 	if d1|d2|d3|d4 != 0 {
 		return Nil, ErrInvalidUUIDFormat
@@ -202,8 +206,8 @@ func Parse(s string) (UUID, error) {
 	var acc byte
 
 	// Byte 0: s[0], s[1]
-	x1 := *(*byte)(unsafe.Pointer(uintptr(valPtr) + 0))
-	x2 := *(*byte)(unsafe.Pointer(uintptr(valPtr) + 1))
+	x1 := *(*byte)(unsafe.Pointer(uintptr(ptr) + 0))
+	x2 := *(*byte)(unsafe.Pointer(uintptr(ptr) + 1))
 
 	v1 := xvalues[x1]
 	v2 := xvalues[x2]
@@ -211,8 +215,8 @@ func Parse(s string) (UUID, error) {
 	uuid[0] = (v1 << 4) | v2
 
 	// Byte 1: s[2], s[3]
-	x1 = *(*byte)(unsafe.Pointer(uintptr(valPtr) + 2))
-	x2 = *(*byte)(unsafe.Pointer(uintptr(valPtr) + 3))
+	x1 = *(*byte)(unsafe.Pointer(uintptr(ptr) + 2))
+	x2 = *(*byte)(unsafe.Pointer(uintptr(ptr) + 3))
 
 	v1 = xvalues[x1]
 	v2 = xvalues[x2]
@@ -220,8 +224,8 @@ func Parse(s string) (UUID, error) {
 	uuid[1] = (v1 << 4) | v2
 
 	// Byte 2: s[4], s[5]
-	x1 = *(*byte)(unsafe.Pointer(uintptr(valPtr) + 4))
-	x2 = *(*byte)(unsafe.Pointer(uintptr(valPtr) + 5))
+	x1 = *(*byte)(unsafe.Pointer(uintptr(ptr) + 4))
+	x2 = *(*byte)(unsafe.Pointer(uintptr(ptr) + 5))
 
 	v1 = xvalues[x1]
 	v2 = xvalues[x2]
@@ -229,8 +233,8 @@ func Parse(s string) (UUID, error) {
 	uuid[2] = (v1 << 4) | v2
 
 	// Byte 3: s[6], s[7]
-	x1 = *(*byte)(unsafe.Pointer(uintptr(valPtr) + 6))
-	x2 = *(*byte)(unsafe.Pointer(uintptr(valPtr) + 7))
+	x1 = *(*byte)(unsafe.Pointer(uintptr(ptr) + 6))
+	x2 = *(*byte)(unsafe.Pointer(uintptr(ptr) + 7))
 
 	v1 = xvalues[x1]
 	v2 = xvalues[x2]
@@ -240,8 +244,8 @@ func Parse(s string) (UUID, error) {
 	// s[8] is '-'
 
 	// Byte 4: s[9], s[10]
-	x1 = *(*byte)(unsafe.Pointer(uintptr(valPtr) + 9))
-	x2 = *(*byte)(unsafe.Pointer(uintptr(valPtr) + 10))
+	x1 = *(*byte)(unsafe.Pointer(uintptr(ptr) + 9))
+	x2 = *(*byte)(unsafe.Pointer(uintptr(ptr) + 10))
 
 	v1 = xvalues[x1]
 	v2 = xvalues[x2]
@@ -249,8 +253,8 @@ func Parse(s string) (UUID, error) {
 	uuid[4] = (v1 << 4) | v2
 
 	// Byte 5: s[11], s[12]
-	x1 = *(*byte)(unsafe.Pointer(uintptr(valPtr) + 11))
-	x2 = *(*byte)(unsafe.Pointer(uintptr(valPtr) + 12))
+	x1 = *(*byte)(unsafe.Pointer(uintptr(ptr) + 11))
+	x2 = *(*byte)(unsafe.Pointer(uintptr(ptr) + 12))
 
 	v1 = xvalues[x1]
 	v2 = xvalues[x2]
@@ -260,8 +264,8 @@ func Parse(s string) (UUID, error) {
 	// s[13] is '-'
 
 	// Byte 6: s[14], s[15]
-	x1 = *(*byte)(unsafe.Pointer(uintptr(valPtr) + 14))
-	x2 = *(*byte)(unsafe.Pointer(uintptr(valPtr) + 15))
+	x1 = *(*byte)(unsafe.Pointer(uintptr(ptr) + 14))
+	x2 = *(*byte)(unsafe.Pointer(uintptr(ptr) + 15))
 
 	v1 = xvalues[x1]
 	v2 = xvalues[x2]
@@ -269,8 +273,8 @@ func Parse(s string) (UUID, error) {
 	uuid[6] = (v1 << 4) | v2
 
 	// Byte 7: s[16], s[17]
-	x1 = *(*byte)(unsafe.Pointer(uintptr(valPtr) + 16))
-	x2 = *(*byte)(unsafe.Pointer(uintptr(valPtr) + 17))
+	x1 = *(*byte)(unsafe.Pointer(uintptr(ptr) + 16))
+	x2 = *(*byte)(unsafe.Pointer(uintptr(ptr) + 17))
 
 	v1 = xvalues[x1]
 	v2 = xvalues[x2]
@@ -280,8 +284,8 @@ func Parse(s string) (UUID, error) {
 	// s[18] is '-'
 
 	// Byte 8: s[19], s[20]
-	x1 = *(*byte)(unsafe.Pointer(uintptr(valPtr) + 19))
-	x2 = *(*byte)(unsafe.Pointer(uintptr(valPtr) + 20))
+	x1 = *(*byte)(unsafe.Pointer(uintptr(ptr) + 19))
+	x2 = *(*byte)(unsafe.Pointer(uintptr(ptr) + 20))
 
 	v1 = xvalues[x1]
 	v2 = xvalues[x2]
@@ -289,8 +293,8 @@ func Parse(s string) (UUID, error) {
 	uuid[8] = (v1 << 4) | v2
 
 	// Byte 9: s[21], s[22]
-	x1 = *(*byte)(unsafe.Pointer(uintptr(valPtr) + 21))
-	x2 = *(*byte)(unsafe.Pointer(uintptr(valPtr) + 22))
+	x1 = *(*byte)(unsafe.Pointer(uintptr(ptr) + 21))
+	x2 = *(*byte)(unsafe.Pointer(uintptr(ptr) + 22))
 
 	v1 = xvalues[x1]
 	v2 = xvalues[x2]
@@ -300,8 +304,8 @@ func Parse(s string) (UUID, error) {
 	// s[23] is '-'
 
 	// Byte 10: s[24], s[25]
-	x1 = *(*byte)(unsafe.Pointer(uintptr(valPtr) + 24))
-	x2 = *(*byte)(unsafe.Pointer(uintptr(valPtr) + 25))
+	x1 = *(*byte)(unsafe.Pointer(uintptr(ptr) + 24))
+	x2 = *(*byte)(unsafe.Pointer(uintptr(ptr) + 25))
 
 	v1 = xvalues[x1]
 	v2 = xvalues[x2]
@@ -309,8 +313,8 @@ func Parse(s string) (UUID, error) {
 	uuid[10] = (v1 << 4) | v2
 
 	// Byte 11: s[26], s[27]
-	x1 = *(*byte)(unsafe.Pointer(uintptr(valPtr) + 26))
-	x2 = *(*byte)(unsafe.Pointer(uintptr(valPtr) + 27))
+	x1 = *(*byte)(unsafe.Pointer(uintptr(ptr) + 26))
+	x2 = *(*byte)(unsafe.Pointer(uintptr(ptr) + 27))
 
 	v1 = xvalues[x1]
 	v2 = xvalues[x2]
@@ -318,8 +322,8 @@ func Parse(s string) (UUID, error) {
 	uuid[11] = (v1 << 4) | v2
 
 	// Byte 12: s[28], s[29]
-	x1 = *(*byte)(unsafe.Pointer(uintptr(valPtr) + 28))
-	x2 = *(*byte)(unsafe.Pointer(uintptr(valPtr) + 29))
+	x1 = *(*byte)(unsafe.Pointer(uintptr(ptr) + 28))
+	x2 = *(*byte)(unsafe.Pointer(uintptr(ptr) + 29))
 
 	v1 = xvalues[x1]
 	v2 = xvalues[x2]
@@ -327,8 +331,8 @@ func Parse(s string) (UUID, error) {
 	uuid[12] = (v1 << 4) | v2
 
 	// Byte 13: s[30], s[31]
-	x1 = *(*byte)(unsafe.Pointer(uintptr(valPtr) + 30))
-	x2 = *(*byte)(unsafe.Pointer(uintptr(valPtr) + 31))
+	x1 = *(*byte)(unsafe.Pointer(uintptr(ptr) + 30))
+	x2 = *(*byte)(unsafe.Pointer(uintptr(ptr) + 31))
 
 	v1 = xvalues[x1]
 	v2 = xvalues[x2]
@@ -336,8 +340,8 @@ func Parse(s string) (UUID, error) {
 	uuid[13] = (v1 << 4) | v2
 
 	// Byte 14: s[32], s[33]
-	x1 = *(*byte)(unsafe.Pointer(uintptr(valPtr) + 32))
-	x2 = *(*byte)(unsafe.Pointer(uintptr(valPtr) + 33))
+	x1 = *(*byte)(unsafe.Pointer(uintptr(ptr) + 32))
+	x2 = *(*byte)(unsafe.Pointer(uintptr(ptr) + 33))
 
 	v1 = xvalues[x1]
 	v2 = xvalues[x2]
@@ -345,8 +349,8 @@ func Parse(s string) (UUID, error) {
 	uuid[14] = (v1 << 4) | v2
 
 	// Byte 15: s[34], s[35]
-	x1 = *(*byte)(unsafe.Pointer(uintptr(valPtr) + 34))
-	x2 = *(*byte)(unsafe.Pointer(uintptr(valPtr) + 35))
+	x1 = *(*byte)(unsafe.Pointer(uintptr(ptr) + 34))
+	x2 = *(*byte)(unsafe.Pointer(uintptr(ptr) + 35))
 
 	v1 = xvalues[x1]
 	v2 = xvalues[x2]

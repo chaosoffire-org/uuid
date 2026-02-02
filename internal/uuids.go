@@ -16,7 +16,7 @@ func (uuids UUIDs) Strings() []string {
 
 	for i := 0; i < length; i++ {
 		offset := i * 36
-		ptr := unsafe.Add(base, offset)
+		ptr := unsafe.Pointer(uintptr(base) + uintptr(offset))
 		encodeHex((*[36]byte)(ptr), uuids[i])
 		result[i] = unsafe.String((*byte)(ptr), 36)
 	}
