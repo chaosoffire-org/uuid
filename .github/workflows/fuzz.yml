@@ -61,7 +61,7 @@ jobs:
         with:
           go-version: stable
       - name: Fuzz ${{ matrix.target }}
-        run: go test -fuzz=${{ matrix.target }} -fuzztime=10s ./internal/
+        run: go test -fuzz="^${{ matrix.target }}$" -fuzztime=10s ./internal/
 
   fuzz-scheduled:
     name: Fuzz (Scheduled)
@@ -97,4 +97,4 @@ jobs:
           restore-keys: |
             fuzz-${{ matrix.target }}-
       - name: Fuzz ${{ matrix.target }}
-        run: go test -fuzz=${{ matrix.target }} -fuzztime=5m ./internal/
+        run: go test -fuzz="^${{ matrix.target }}$" -fuzztime=5m ./internal/

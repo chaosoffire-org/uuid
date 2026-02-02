@@ -30,7 +30,7 @@ format:
 # Install golangci-lint to bin directory
 $(GOLANGCI_LINT): setup
 	@echo "==> Installing golangci-lint..."
-	@curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(BIN_DIR) latest
+	@GOBIN=$(shell pwd)/$(BIN_DIR) go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@latest
 
 # Lint code
 lint: $(GOLANGCI_LINT)
