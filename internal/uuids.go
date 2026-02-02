@@ -12,11 +12,11 @@ func (uuids UUIDs) Strings() []string {
 	buf := make([]byte, length*36)
 	result := make([]string, length)
 
-	base := unsafe.Pointer(unsafe.SliceData(buf))
+	bufPtr := unsafe.Pointer(unsafe.SliceData(buf))
 
 	for i := 0; i < length; i++ {
 		offset := i * 36
-		ptr := unsafe.Pointer(uintptr(base) + uintptr(offset))
+		ptr := unsafe.Pointer(uintptr(bufPtr) + uintptr(offset))
 		encodeHex((*[36]byte)(ptr), uuids[i])
 		result[i] = unsafe.String((*byte)(ptr), 36)
 	}
