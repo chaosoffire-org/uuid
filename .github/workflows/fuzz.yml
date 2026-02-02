@@ -1,100 +1,53 @@
 name: Fuzz
 
 on:
-  pull_request:
-    branches: [main, master]
-  schedule:
-    # Run daily at 2:00 AM UTC
-    - cron: '0 2 * * *'
   workflow_dispatch:
+    inputs:
+      fuzz_time:
+        description: 'Fuzz test duration'
+        default: '5m'
+        type: string
+  workflow_call:
+    inputs:
+      fuzz_time:
+        required: true
+        type: string
 
 permissions:
   contents: read
 
 jobs:
-  # Check if there are new commits (for scheduled runs)
-  check-changes:
-    name: Check for changes
+  fuzz:
+    name: Fuzz ${{ matrix.target }}
     runs-on: ubuntu-latest
-    if: github.event_name == 'schedule'
-    outputs:
-      should_run: ${{ steps.check.outputs.should_run }}
-    steps:
-      - uses: actions/checkout@v6
-        with:
-          fetch-depth: 2
-      - name: Check for changes in last 24h
-        id: check
-        run: |
-          LAST_COMMIT=$(git log -1 --format=%ct)
-          NOW=$(date +%s)
-          DIFF=$((NOW - LAST_COMMIT))
-          # 86400 seconds = 24 hours
-          if [ $DIFF -lt 86400 ]; then
-            echo "should_run=true" >> $GITHUB_OUTPUT
-          else
-            echo "should_run=false" >> $GITHUB_OUTPUT
-            echo "No commits in last 24h, skipping fuzz tests"
-          fi
-
-  fuzz-pr:
-    name: Fuzz (PR)
-    runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
     strategy:
       matrix:
         target:
-          [
-            FuzzParse,
-            FuzzParseBytes,
-            FuzzFromBytes,
-            FuzzUnmarshalText,
-            FuzzUnmarshalBinary,
-            FuzzScan,
-            FuzzNullUUIDScanString,
-            FuzzNullUUIDScanBytes,
-            FuzzNewRandom,
-          ]
+          - FuzzParse
+          - FuzzParseBytes
+          - FuzzFromBytes
+          - FuzzUnmarshalText
+          - FuzzUnmarshalBinary
+          - FuzzScan
+          - FuzzNullUUIDScanString
+          - FuzzNullUUIDScanBytes
+          - FuzzNewRandom
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-go@v6
-        with:
-          go-version: stable
-      - name: Fuzz ${{ matrix.target }}
-        run: go test -fuzz="^${{ matrix.target }}$" -fuzztime=10s ./internal/
+      - name: Checkout repository
+        uses: actions/checkout@v6
 
-  fuzz-scheduled:
-    name: Fuzz (Scheduled)
-    runs-on: ubuntu-latest
-    needs: check-changes
-    if: |
-      github.event_name == 'workflow_dispatch' ||
-      (github.event_name == 'schedule' && needs.check-changes.outputs.should_run == 'true')
-    strategy:
-      matrix:
-        target:
-          [
-            FuzzParse,
-            FuzzParseBytes,
-            FuzzFromBytes,
-            FuzzUnmarshalText,
-            FuzzUnmarshalBinary,
-            FuzzScan,
-            FuzzNullUUIDScanString,
-            FuzzNullUUIDScanBytes,
-            FuzzNewRandom,
-          ]
-    steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-go@v6
+      - name: Setup Go
+        uses: actions/setup-go@v6
         with:
           go-version: stable
+          cache: true
+
       - name: Restore fuzz cache
         uses: actions/cache@v5
         with:
           path: ~/.cache/go-build/fuzz
           key: fuzz-${{ matrix.target }}-${{ github.sha }}
-          restore-keys: |
-            fuzz-${{ matrix.target }}-
-      - name: Fuzz ${{ matrix.target }}
-        run: go test -fuzz="^${{ matrix.target }}$" -fuzztime=5m ./internal/
+          restore-keys: fuzz-${{ matrix.target }}-
+
+      - name: Run fuzz test
+        run: go test -fuzz="^${{ matrix.target }}$" -fuzztime=${{ inputs.fuzz_time }} ./internal/
