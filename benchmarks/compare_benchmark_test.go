@@ -15,6 +15,8 @@ import (
 var (
 	sinkUUID          uuid.UUID
 	sinkGoogleUUID    googleuuid.UUID
+	sinkUUIDs         []string
+	sinkGoogleUUIDs   []string
 	sinkString        string
 	sinkBytes         []byte
 	sinkErr           error
@@ -197,6 +199,32 @@ func BenchmarkURN_Google(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		sinkString = u.URN()
+	}
+}
+
+func BenchmarkStrings_This(b *testing.B) {
+	b.ReportAllocs()
+	const count = 1000
+	uuids := make(uuid.UUIDs, count)
+	for i := 0; i < count; i++ {
+		uuids[i] = uuid.New()
+	}
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		sinkUUIDs = uuids.Strings()
+	}
+}
+
+func BenchmarkStrings_Google(b *testing.B) {
+	b.ReportAllocs()
+	const count = 1000
+	uuids := make(googleuuid.UUIDs, count)
+	for i := 0; i < count; i++ {
+		uuids[i] = googleuuid.New()
+	}
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		sinkGoogleUUIDs = uuids.Strings()
 	}
 }
 
