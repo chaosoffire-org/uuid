@@ -47,3 +47,35 @@ func TestEncodeHexAllBytes(t *testing.T) {
 		}
 	}
 }
+
+func TestReadRandom(t *testing.T) {
+	var dst [16]byte
+	err := readRandom(&dst)
+	if err != nil {
+		t.Errorf("readRandom() error = %v, wantErr false", err)
+	}
+
+	// Check that the bytes are not all zero
+	for _, b := range dst {
+		if b != 0 {
+			return
+		}
+	}
+	t.Errorf("readRandom() returned all zeros")
+}
+
+func TestReadRandomUniqueness(t *testing.T) {
+	var a, b [16]byte
+
+	if err := readRandom(&a); err != nil {
+		t.Fatalf("readRandom() error = %v", err)
+	}
+
+	if err := readRandom(&b); err != nil {
+		t.Fatalf("readRandom() error = %v", err)
+	}
+
+	if a == b {
+		t.Errorf("readRandom() produced identical outputs: %x", a)
+	}
+}

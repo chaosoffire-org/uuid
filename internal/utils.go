@@ -1,5 +1,7 @@
 package internal
 
+import "crypto/rand"
+
 // encodeHex encodes uuid into dst using branchless bit manipulation.
 func encodeHex(dst *[36]byte, uuid UUID) {
 	dst[8] = '-'
@@ -43,4 +45,13 @@ func encodeHex(dst *[36]byte, uuid UUID) {
 	dst[2] = hextable[uuid[1]>>4]
 	dst[1] = hextable[uuid[0]&0x0f]
 	dst[0] = hextable[uuid[0]>>4]
+}
+
+func readRandom(dst *[16]byte) error {
+	_, err := rand.Read(dst[:])
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

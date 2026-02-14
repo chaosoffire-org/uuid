@@ -332,6 +332,26 @@ func TestMustPanic(t *testing.T) {
 	Must(Parse("invalid"))
 }
 
+func TestMustPanicErrorType(t *testing.T) {
+	defer func() {
+		r := recover()
+		if r == nil {
+			t.Fatal("Must(error) should panic")
+		}
+
+		err, ok := r.(error)
+		if !ok {
+			t.Fatalf("Must() panicked with non-error type: %T", r)
+		}
+
+		if !errors.Is(err, ErrInvalidLength) {
+			t.Errorf("Must() panicked with %v, want ErrInvalidLength", err)
+		}
+	}()
+
+	Must(Parse("invalid"))
+}
+
 func TestVersionString(t *testing.T) {
 	tests := []struct {
 		version Version
@@ -354,6 +374,15 @@ func TestVersionString(t *testing.T) {
 				t.Errorf("Version.String() = %v, want %v", got, tt.want)
 			}
 		})
+	}
+}
+
+func TestScanInvalidByteLength(t *testing.T) {
+	var uuid UUID
+
+	err := uuid.Scan([]byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10})
+	if !errors.Is(err, ErrInvalidLength) {
+		t.Errorf("Scan(10 bytes) error = %v, want ErrInvalidLength", err)
 	}
 }
 

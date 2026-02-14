@@ -1,7 +1,6 @@
 package internal
 
 import (
-	"crypto/rand"
 	"io"
 )
 
@@ -9,10 +8,13 @@ import (
 func New() UUID {
 	var uuid UUID
 
-	err := uuid.readRandom()
+	err := readRandom((*[16]byte)(&uuid))
 	if err != nil {
 		panic(err)
 	}
+
+	uuid.SetVersion(V4)
+	uuid.SetVariant(VariantRFC4122)
 
 	return uuid
 }
@@ -26,10 +28,13 @@ func NewString() string {
 func NewRandom() (UUID, error) {
 	var uuid UUID
 
-	err := uuid.readRandom()
+	err := readRandom((*[16]byte)(&uuid))
 	if err != nil {
 		return Nil, err
 	}
+
+	uuid.SetVersion(V4)
+	uuid.SetVariant(VariantRFC4122)
 
 	return uuid, nil
 }
@@ -47,16 +52,4 @@ func NewRandomFromReader(r io.Reader) (UUID, error) {
 	uuid.SetVariant(VariantRFC4122)
 
 	return uuid, nil
-}
-
-func (u *UUID) readRandom() error {
-	_, err := rand.Read(u[:])
-	if err != nil {
-		return err
-	}
-
-	u.SetVersion(V4)
-	u.SetVariant(VariantRFC4122)
-
-	return nil
 }
