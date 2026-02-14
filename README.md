@@ -5,7 +5,7 @@
 [![Go Reference](https://pkg.go.dev/badge/github.com/chaosoffire-org/uuid.svg)](https://pkg.go.dev/github.com/chaosoffire-org/uuid)
 [![Go Report Card](https://goreportcard.com/badge/github.com/chaosoffire-org/uuid)](https://goreportcard.com/report/github.com/chaosoffire-org/uuid)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
-[![Coverage](https://img.shields.io/badge/Coverage-98.4%25-brightgreen.svg)](coverage.html)
+[![codecov](https://codecov.io/gh/chaosoffire-org/uuid/graph/badge.svg?token=BOKKDHAT86)](https://codecov.io/gh/chaosoffire-org/uuid)
 
 **A blazing-fast, zero-allocation UUID library for Go**
 
