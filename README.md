@@ -23,7 +23,7 @@ _RFC 9562 compliant • Outperforms google/uuid • Battle-tested with fuzz test
 | ⚡ **Significantly Faster**     | Optimized for speed vs google/uuid       |
 | 🔒 **Cryptographically Secure** | Uses `crypto/rand` for random generation |
 | 📦 **Zero Dependencies**        | No external dependencies whatsoever      |
-| 🧪 **98.4% Test Coverage**      | Comprehensive unit + fuzz testing        |
+| 🧪 **High Test Coverage**       | Comprehensive unit + fuzz testing        |
 | 🛡️ **Bounds Check Elimination** | Compiler-verified safe array access      |
 
 ## 🎯 Supported Versions
