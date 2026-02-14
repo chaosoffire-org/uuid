@@ -33,9 +33,11 @@ func TestNew(t *testing.T) {
 	if u.Version() != V4 {
 		t.Errorf("New() returned UUID with version %v, want %v", u.Version(), V4)
 	}
+
 	if u.Variant() != VariantRFC4122 {
 		t.Errorf("New() returned UUID with variant %v, want %v", u.Variant(), VariantRFC4122)
 	}
+
 	if u == Nil {
 		t.Errorf("New() returned Nil UUID")
 	}
@@ -46,6 +48,7 @@ func TestNewString(t *testing.T) {
 	if len(s) != 36 {
 		t.Errorf("NewString() returned length %d, want 36", len(s))
 	}
+
 	if _, err := Parse(s); err != nil {
 		t.Errorf("NewString() returned invalid UUID string: %v", err)
 	}
@@ -56,9 +59,11 @@ func TestNewRandom(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewRandom() failed: %v", err)
 	}
+
 	if u.Version() != V4 {
 		t.Errorf("NewRandom() returned UUID with version %v, want %v", u.Version(), V4)
 	}
+
 	if u.Variant() != VariantRFC4122 {
 		t.Errorf("NewRandom() returned UUID with variant %v, want %v", u.Variant(), VariantRFC4122)
 	}
@@ -69,9 +74,11 @@ func TestNewV7(t *testing.T) {
 	if err != nil {
 		t.Fatalf("NewV7() failed: %v", err)
 	}
+
 	if u.Version() != V7 {
 		t.Errorf("NewV7() returned UUID with version %v, want %v", u.Version(), V7)
 	}
+
 	if u.Variant() != VariantRFC4122 {
 		t.Errorf("NewV7() returned UUID with variant %v, want %v", u.Variant(), VariantRFC4122)
 	}
@@ -129,6 +136,7 @@ func TestMustParse(t *testing.T) {
 			t.Errorf("MustParse() did not panic on invalid input")
 		}
 	}()
+
 	MustParse("invalid-uuid")
 }
 
@@ -150,6 +158,7 @@ func TestFromBytes(t *testing.T) {
 			if (err != nil) != tt.wantErr {
 				t.Errorf("FromBytes() error = %v, wantErr %v", err, tt.wantErr)
 			}
+
 			if err == nil && !bytes.Equal(u[:], tt.input) {
 				t.Errorf("FromBytes() returned mismatching bytes")
 			}
@@ -171,6 +180,7 @@ func TestMust(t *testing.T) {
 				t.Errorf("Must() did not panic on error")
 			}
 		}()
+
 		Must(Nil, ErrInvalidLength)
 	})
 }

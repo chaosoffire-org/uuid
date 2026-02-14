@@ -50,6 +50,7 @@ func TestEncodeHexAllBytes(t *testing.T) {
 
 func TestReadRandom(t *testing.T) {
 	var dst [16]byte
+
 	err := readRandom(&dst)
 	if err != nil {
 		t.Errorf("readRandom() error = %v, wantErr false", err)
@@ -61,6 +62,7 @@ func TestReadRandom(t *testing.T) {
 			return
 		}
 	}
+
 	t.Errorf("readRandom() returned all zeros")
 }
 

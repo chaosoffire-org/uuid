@@ -19,6 +19,7 @@ var (
 // NewV7 generates a new UUID version 7 (Unix Epoch time-based).
 func NewV7() (UUID, error) {
 	var uuid UUID
+
 	err := readRandom((*[16]byte)(&uuid))
 	if err != nil {
 		return uuid, err
