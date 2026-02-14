@@ -2,7 +2,6 @@ name: CI
 
 on:
   push:
-    branches: [main]
   pull_request:
     branches: [main]
 
@@ -29,11 +28,12 @@ jobs:
         uses: golangci/golangci-lint-action@v9
 
   test:
-    name: Test (Go ${{ matrix.go }})
-    runs-on: ubuntu-latest
+    name: Test (Go ${{ matrix.go }}, OS ${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         go: ['1.20', '1.21', '1.22', '1.23', '1.24', '1.25']
+        os: [ubuntu-latest, windows-latest, macos-latest]
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-go@v6
@@ -41,34 +41,10 @@ jobs:
           go-version: ${{ matrix.go }}
           cache: true
       - name: Run tests
-        run: go test -race -coverprofile=coverage.out ./...
+        run: go test -race -coverprofile=coverage.out -covermode=atomic ./...
       - name: Upload coverage
-        if: matrix.go == '1.25'
-        uses: codecov/codecov-action@v4
+        if: matrix.go == '1.25' && matrix.os == 'ubuntu-latest'
+        uses: codecov/codecov-action@v5
         with:
           files: coverage.out
-
-  deploy-coverage:
-    name: Deploy Coverage
-    needs: [lint, test]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-go@v6
-        with:
-          go-version: stable
-          cache: true
-      - name: Generate Coverage Report
-        run: |
-          go test -coverprofile=coverage.out ./...
-          mkdir -p coverage
-          go tool cover -html=coverage.out -o coverage/index.html
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./coverage
-          force_orphan: true
+          token: ${{ secrets.CODECOV_TOKEN }}
