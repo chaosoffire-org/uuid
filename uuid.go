@@ -1,7 +1,7 @@
 // Package uuid provides RFC 4122 UUID implementation.
 package uuid
 
-import "github.com/chaosoffire-org/uuid/internal"
+import "github.com/chaosoffire-org/uuid-go/internal"
 
 // Type aliases for public API
 type (

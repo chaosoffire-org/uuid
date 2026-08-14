@@ -2,10 +2,10 @@
 
 <div align="center">
 
-[![Go Reference](https://pkg.go.dev/badge/github.com/chaosoffire-org/uuid.svg)](https://pkg.go.dev/github.com/chaosoffire-org/uuid)
-[![Go Report Card](https://goreportcard.com/badge/github.com/chaosoffire-org/uuid)](https://goreportcard.com/report/github.com/chaosoffire-org/uuid)
+[![Go Reference](https://pkg.go.dev/badge/github.com/chaosoffire-org/uuid-go.svg)](https://pkg.go.dev/github.com/chaosoffire-org/uuid-go)
+[![Go Report Card](https://goreportcard.com/badge/github.com/chaosoffire-org/uuid-go)](https://goreportcard.com/report/github.com/chaosoffire-org/uuid-go)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
-[![codecov](https://codecov.io/gh/chaosoffire-org/uuid/graph/badge.svg?token=BOKKDHAT86)](https://codecov.io/gh/chaosoffire-org/uuid)
+[![codecov](https://codecov.io/gh/chaosoffire-org/uuid-go/graph/badge.svg?token=BOKKDHAT86)](https://codecov.io/gh/chaosoffire-org/uuid-go)
 
 **A blazing-fast, zero-allocation UUID library for Go**
 
@@ -38,7 +38,7 @@ _RFC 9562 compliant • Outperforms google/uuid • Battle-tested with fuzz test
 ## 📦 Installation
 
 ```bash
-go get github.com/chaosoffire-org/uuid
+go get github.com/chaosoffire-org/uuid-go
 ```
 
 ## 🚀 Quick Start
@@ -48,7 +48,7 @@ package main
 
 import (
     "fmt"
-    "github.com/chaosoffire-org/uuid"
+    "github.com/chaosoffire-org/uuid-go"
 )
 
 func main() {

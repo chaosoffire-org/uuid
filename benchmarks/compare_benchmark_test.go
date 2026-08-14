@@ -3,7 +3,7 @@ package benchmarks
 import (
 	"testing"
 
-	"github.com/chaosoffire-org/uuid"
+	"github.com/chaosoffire-org/uuid-go"
 
 	googleuuid "github.com/google/uuid"
 )
