@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v2.0.0]
+
+- breaking: renamed the Go module and repository path from `github.com/chaosoffire-org/uuid` to `github.com/chaosoffire-org/uuid-go`
+- docs: updated installation and import examples to match the new module name
+- chore: aligned benchmark and internal package references with the renamed module path
+
 ## [v1.0.1]
 
 - docs: update coverage text in readme (995bc37)
